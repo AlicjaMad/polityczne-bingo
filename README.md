@@ -249,6 +249,18 @@
             "CPK to fuszerka",
             "Euro zamiast złotego",
             "Czyszczenie sądów",
+            "Finansowanie z zagranicy",
+            "Soros finansuje kampanię",
+            "Nielegalne finansowanie",
+            "Prostytutki w hotelu",
+            "Kampania kłamstw",
+            "Dezinformacja i fake news",
+            "Ordo Iuris atakuje",
+            "Prostytucja polityczna",
+            "Obce pieniądze",
+            "Stekiem kłamstw",
+            "Pozew sądowy",
+            "Prokuratura bada",
             "DARMOWE POLE"
         ];
 
@@ -263,12 +275,12 @@
                 cell.className = 'bingo-cell';
                 cell.dataset.index = i;
                 
-                if (i === 12) {
-                    cell.textContent = bingoItems[24];
+                if (i === 18) {
+                    cell.textContent = bingoItems[36];
                     cell.classList.add('center-cell', 'marked');
                     markedCells.add(i);
                 } else {
-                    const itemIndex = i < 12 ? i : i - 1;
+                    const itemIndex = i < 18 ? i : (i > 18 ? i - 1 : i);
                     cell.textContent = bingoItems[itemIndex];
                 }
                 
@@ -281,7 +293,7 @@
         }
 
         function toggleCell(index) {
-            if (index === 12) return;
+            if (index === 18) return;
             
             const cell = document.querySelector('[data-index="' + index + '"]');
             
@@ -329,18 +341,18 @@
 
         function resetBingo() {
             markedCells.clear();
-            markedCells.add(12);
+            markedCells.add(18);
             
             document.querySelectorAll('.bingo-cell').forEach(function(cell) {
                 cell.classList.remove('marked');
             });
             
-            document.querySelector('[data-index="12"]').classList.add('marked');
+            document.querySelector('[data-index="18"]').classList.add('marked');
             document.getElementById('winnerMessage').style.display = 'none';
         }
 
         function shuffleBingo() {
-            const itemsToShuffle = bingoItems.slice(0, 24);
+            const itemsToShuffle = bingoItems.slice(0, 36);
             
             for (let i = itemsToShuffle.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -348,8 +360,8 @@
             }
             
             document.querySelectorAll('.bingo-cell').forEach(function(cell, index) {
-                if (index !== 12) {
-                    const itemIndex = index < 12 ? index : index - 1;
+                if (index !== 18) {
+                    const itemIndex = index < 18 ? index : (index > 18 ? index - 1 : index);
                     cell.textContent = itemsToShuffle[itemIndex];
                 }
             });
