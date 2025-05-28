@@ -168,6 +168,46 @@
             font-weight: bold;
             margin-top: 20px;
             display: none;
+            animation: winnerBounce 0.6s ease-out;
+        }
+        
+        @keyframes winnerBounce {
+            0% { transform: scale(0.3) rotate(-10deg); opacity: 0; }
+            50% { transform: scale(1.1) rotate(5deg); opacity: 1; }
+            100% { transform: scale(1) rotate(0deg); opacity: 1; }
+        }
+        
+        .confetti {
+            position: fixed;
+            width: 10px;
+            height: 10px;
+            background: #ffd700;
+            animation: fall linear infinite;
+            z-index: 1000;
+        }
+        
+        @keyframes fall {
+            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(100vh) rotate(360deg); opacity: 0; }
+        }
+        
+        .bingo-cell.winning {
+            animation: winningPulse 1s ease-in-out infinite;
+        }
+        
+        @keyframes winningPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 0 rgba(40, 167, 69, 0.7); }
+            50% { transform: scale(1.05); box-shadow: 0 0 0 10px rgba(40, 167, 69, 0); }
+        }
+        
+        .celebration-text {
+            animation: celebrationBounce 2s ease-in-out infinite;
+        }
+        
+        @keyframes celebrationBounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-10px); }
+            60% { transform: translateY(-5px); }
         }
         
         @media (max-width: 768px) {
@@ -218,7 +258,8 @@
             </div>
             
             <div class="winner-message" id="winnerMessage">
-                🎉 BINGO! Gratulacje! 🎉
+                <div class="celebration-text">🎉 BINGO! Gratulacje! 🎉</div>
+                <div style="margin-top: 10px; font-size: 0.9em;">Zdobyłeś pełną linię argumentów politycznych!</div>
             </div>
         </div>
     </div>
@@ -333,10 +374,85 @@
         }
 
         function showWinner() {
-            document.getElementById('winnerMessage').style.display = 'block';
+            const winnerMessage = document.getElementById('winnerMessage');
+            winnerMessage.style.display = 'block';
+            
+            // Dodaj animację do wygrywających pól
+            highlightWinningLine();
+            
+            // Stwórz konfetti
+            createConfetti();
+            
+            // Ukryj wiadomość po 7 sekundach
             setTimeout(function() {
-                document.getElementById('winnerMessage').style.display = 'none';
-            }, 5000);
+                winnerMessage.style.display = 'none';
+                clearWinningHighlight();
+                clearConfetti();
+            }, 7000);
+        }
+        
+        function highlightWinningLine() {
+            const winConditions = [
+                [0, 1, 2, 3, 4], [5, 6, 7, 8, 9], [10, 11, 12, 13, 14],
+                [15, 16, 17, 18, 19], [20, 21, 22, 23, 24],
+                [0, 5, 10, 15, 20], [1, 6, 11, 16, 21], [2, 7, 12, 17, 22],
+                [3, 8, 13, 18, 23], [4, 9, 14, 19, 24],
+                [0, 6, 12, 18, 24], [4, 8, 12, 16, 20]
+            ];
+
+            for (let condition of winConditions) {
+                if (condition.every(index => markedCells.has(index))) {
+                    condition.forEach(index => {
+                        const cell = document.querySelector('[data-index="' + index + '"]');
+                        cell.classList.add('winning');
+                    });
+                    break;
+                }
+            }
+        }
+        
+        function clearWinningHighlight() {
+            document.querySelectorAll('.bingo-cell').forEach(function(cell) {
+                cell.classList.remove('winning');
+            });
+        }
+        
+        function createConfetti() {
+            const colors = ['#ffd700', '#ff6b35', '#4361ee', '#28a745', '#dc3545', '#6f42c1'];
+            const confettiCount = 50;
+            
+            for (let i = 0; i < confettiCount; i++) {
+                setTimeout(function() {
+                    const confetti = document.createElement('div');
+                    confetti.className = 'confetti';
+                    confetti.style.left = Math.random() * 100 + 'vw';
+                    confetti.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                    confetti.style.animationDuration = (Math.random() * 3 + 2) + 's';
+                    confetti.style.animationDelay = Math.random() * 2 + 's';
+                    
+                    // Różne kształty konfetti
+                    if (Math.random() > 0.5) {
+                        confetti.style.borderRadius = '50%';
+                    }
+                    
+                    document.body.appendChild(confetti);
+                    
+                    // Usuń konfetti po animacji
+                    setTimeout(function() {
+                        if (confetti.parentNode) {
+                            confetti.parentNode.removeChild(confetti);
+                        }
+                    }, 5000);
+                }, i * 100);
+            }
+        }
+        
+        function clearConfetti() {
+            document.querySelectorAll('.confetti').forEach(function(confetti) {
+                if (confetti.parentNode) {
+                    confetti.parentNode.removeChild(confetti);
+                }
+            });
         }
 
         function resetBingo() {
@@ -344,11 +460,12 @@
             markedCells.add(18);
             
             document.querySelectorAll('.bingo-cell').forEach(function(cell) {
-                cell.classList.remove('marked');
+                cell.classList.remove('marked', 'winning');
             });
             
             document.querySelector('[data-index="18"]').classList.add('marked');
             document.getElementById('winnerMessage').style.display = 'none';
+            clearConfetti();
         }
 
         function shuffleBingo() {
